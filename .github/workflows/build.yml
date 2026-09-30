@@ -24,12 +24,17 @@
 name: Build
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit, branch, or tag to build
+        required: false
+        type: string
+      attestations:
+        description: Create artifact attestations
+        required: false
+        default: false
+        type: boolean
   workflow_call:
     inputs:
       ref:
