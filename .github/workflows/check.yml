@@ -24,12 +24,20 @@
 name: Check
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+  workflow_dispatch:
+    inputs:
+      release_branch:
+        description: Release branch to validate (leave empty for normal checks)
+        required: false
+        type: string
+      base_sha:
+        description: Base commit for release branch validation
+        required: false
+        type: string
+      head_sha:
+        description: Head commit for release branch validation
+        required: false
+        type: string
 
 jobs:
   clippy:
@@ -134,7 +142,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     if: |
-      startsWith(github.event.pull_request.head.ref, 'release/')
+      startsWith(inputs.release_branch, 'release/')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -144,8 +152,8 @@ jobs:
 
       - name: Check commit count
         run: |
-          BASE="${{ github.event.pull_request.base.sha }}"
-          HEAD="${{ github.event.pull_request.head.sha }}"
+          BASE="${{ inputs.base_sha }}"
+          HEAD="${{ inputs.head_sha }}"
           COMMITS=$(git rev-list --count $HEAD ^$BASE)
           if [ "$COMMITS" -ne 1 ]; then
             echo "Release branch must contain exactly one commit, found $COMMITS"
