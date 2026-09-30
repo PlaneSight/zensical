@@ -24,11 +24,16 @@
 name: Commit
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Base commit of the range to validate
+        required: true
+        type: string
+      head_sha:
+        description: Head commit of the range to validate
+        required: true
+        type: string
 
 jobs:
   validate:
@@ -38,7 +43,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ inputs.head_sha }}
           fetch-depth: 0
 
       - name: Set up mono
@@ -46,8 +51,8 @@ jobs:
 
       - name: Get commit messages
         run: |
-          BASE="${{ github.event.pull_request.base.sha }}"
-          HEAD="${{ github.event.pull_request.head.sha }}"
+          BASE="${{ inputs.base_sha }}"
+          HEAD="${{ inputs.head_sha }}"
           git log "$BASE..$HEAD" --format=%h > commits.txt
 
       - name: Validate commit messages
